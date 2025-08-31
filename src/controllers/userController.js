@@ -230,7 +230,6 @@ exports.uploadProfile = (req, res) => {
     });
 }
 
-// API lấy danh sách tất cả người dùng (có thể dùng cho Messager)
 exports.getUsers = (req, res) => {
   const uid = req.params.uid;
   const sql =

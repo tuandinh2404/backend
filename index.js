@@ -25,7 +25,7 @@ app.use(bodyParser.json());
 // Kết nối c
 const db = new Pool({
   host: process.env.PG_HOST || "localhost",
-  user: process.env.PG_USER || "postgres",
+  user: process.env.PG_USER || "myuser",
   password: process.env.PG_PASSWORD || "",
   database: process.env.PG_DB || "serverappdb",
   port: process.env.PG_PORT || 5432,

@@ -9,13 +9,15 @@ const db = new Pool({
   password: process.env.PG_PASSWORD,
   database: process.env.PG_DB,
 });
+console.log("PG_USER in use:", process.env.PG_USER);
+
 
 db.connect(err => {
   if (err) {
     console.error('Kết nối PostgreSQL lỗi:', err);
     return;
   }
-  console.log('✅ Kết nối PostgreSQL thành công');
+  console.log('✅ Kết nối PostgreSQL thành công tại db.js');
 });
 
 module.exports = db;
