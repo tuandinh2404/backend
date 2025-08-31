@@ -36,7 +36,7 @@ db.connect((err) => {
     console.error("Lỗi kết nối PostgreSQL:", err);
     return;
   }
-  console.log("Kết nối PostgreSQL thành côngggggg");
+  console.log("Kết nối PostgreSQL thành công tại Express");
 });
 
 

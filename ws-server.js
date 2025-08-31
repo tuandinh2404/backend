@@ -23,7 +23,7 @@ db.connect((err) => {
     console.error("Lỗi kết nối PostgreSQL:", err);
     process.exit(1);
   }
-  console.log("✅ Kết nối PostgreSQL thành công");
+  console.log("✅ Kết nối PostgreSQL thành công tại WS");
 });
 
 db.query("SELECT current_database()", (err, results) => {
