@@ -10,6 +10,9 @@ const db = new Pool({
   database: process.env.PG_DB,
   port: process.env.PG_PORT,
 });
-console.log("PG_USER in use:", process.env.PG_USER);
+
+console.log("PG_HOST:", process.env.PG_HOST);
+console.log("PG_USER:", process.env.PG_USER);
+console.log("PG_DB:", process.env.PG_DB);
 
 module.exports = db;
