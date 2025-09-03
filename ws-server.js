@@ -10,13 +10,7 @@ const { Pool } = require("pg");
 dotenv.config();
 
 // Kết nối PostgreSQL
-const db = new Pool({
-  host: process.env.PG_HOST || "localhost",
-  user: process.env.PG_USER || "postgres",
-  password: process.env.PG_PASSWORD || "",
-  database: process.env.PG_DB || "serverappdb",
-  port: process.env.PG_PORT || 5432,
-});
+const db = require("./src/config/db");
 
 db.connect((err) => {
   if (err) {
