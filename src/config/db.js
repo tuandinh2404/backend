@@ -15,4 +15,17 @@ console.log("PG_HOST:", process.env.PG_HOST);
 console.log("PG_USER:", process.env.PG_USER);
 console.log("PG_DB:", process.env.PG_DB);
 
+db.connect()
+.then(() => {
+  console.log("✅ Kết nối PostgreSQL thành công");
+  return db.query("SELECT current_database()")
+})
+.then(res => {
+    console.log("📂 Đang kết nối database:", results.rows[0].current_database);
+})
+.catch(err => {
+    console.error("❌ Lỗi kết nối PostgreSQL:", err);
+    process.exit(1);
+})
+
 module.exports = db;
