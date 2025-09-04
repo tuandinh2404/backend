@@ -25,16 +25,6 @@ app.use(bodyParser.json());
 // Kết nối cơ sở dữ liệu
 const db = require("./src/config/db");
 
-db.connect((err) => {
-  if (err) {
-    console.error("Lỗi kết nối PostgreSQL:", err);
-    return;
-  }
-  console.log("Kết nối PostgreSQL thành công tại Express");
-});
-
-
-
 // API người dùng
 app.use("/api-user", userRouter)
 

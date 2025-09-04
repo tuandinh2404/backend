@@ -12,21 +12,6 @@ dotenv.config();
 // Kết nối PostgreSQL
 const db = require("./src/config/db");
 
-db.connect((err) => {
-  if (err) {
-    console.error("Lỗi kết nối PostgreSQL:", err);
-    process.exit(1);
-  }
-  console.log("✅ Kết nối PostgreSQL thành công tại WS");
-});
-
-db.query("SELECT current_database()", (err, results) => {
-  if (err) {
-    console.error("Lỗi kiểm tra database:", err);
-  } else {
-    console.log("📂 Đang kết nối database:", results.rows[0].current_database);
-  }
-});
 
 const wss = new WebSocket.Server(
   { port: 8090, maxPayload: 10 * 1024 * 1024 },
