@@ -21,7 +21,7 @@ db.connect()
   return db.query("SELECT current_database()")
 })
 .then(res => {
-    console.log("📂 Đang kết nối database:", results.rows[0].current_database);
+    console.log("📂 Đang kết nối database:", res.rows[0].current_database);
 })
 .catch(err => {
     console.error("❌ Lỗi kết nối PostgreSQL:", err);
