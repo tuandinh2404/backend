@@ -4,11 +4,19 @@ const path = require("path");
 const mine = require("mime-types");
 
 const uploadToS3 = async (buffer, originalFilename, uid) => {
-  const ext = path.extname(originalFilename) || ".jpg";
+  const ext = path.extname(originalFilename).toLowerCase() || ".jpg";
   const filename = `${uuidv4()}${ext}`;
   const key = `users/${uid}/${filename}`;
   
   const ContentType = mine.lookup(ext) || "application/octet-stream";
+
+    if (ext === ".mp4") {
+    ContentType = "video/mp4";
+  } else if (ext === ".jpg" || ext === ".jpeg") {
+    ContentType = "image/jpeg";
+  } else if (ext === ".png") {
+    ContentType = "image/png";
+  }
 
   const params = {
     Bucket: process.env.AWS_BUCKET_NAME,
