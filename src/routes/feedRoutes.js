@@ -4,4 +4,4 @@ const feedController = require("../controllers/feedController")
 
 router.post("/posts", feedController.Posts)
 router.get("/posts/:postId", feedController.getPosts)
-module.exports = router
+module.exports = router;

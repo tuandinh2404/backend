@@ -1,4 +1,6 @@
 const db = require("../config/db");
+const UploadToS3 = require("./src/util/UploadToS3");
+
 
 
 exports.Posts = async ( req, res) => {
@@ -11,9 +13,16 @@ exports.Posts = async ( req, res) => {
         );
         const postId = postResult.rows[0].id;
         if(media && media.length > 0) {
-            const values = media.map(
-                (m, i) => `(${postId}, '${m.mediaurl}', '${m.mediatype}', ${i})`
-            ).join(", ");
+            const values = await Promise.all(
+            media.map(async(m, i) => {
+                let mediaurl = m.mediaurl;
+
+                if(m.buffer) {
+                    mediaurl = await UploadToS3(m.buffer, m.originalFilename || `file_${i}`, userId);
+                }
+                return `(${postId}, '${mediaurl}', '${m.mediatype}', ${i})`
+        }).join(", ")
+        );
             await db.query(
                 `INSERT INTO post_media (post_id, media_url, media_type, position)
                 VALUES ${values}`
