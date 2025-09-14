@@ -13,7 +13,7 @@ exports.Posts = async ( req, res) => {
         );
         const postId = postResult.rows[0].id;
         if(media && media.length > 0) {
-            const values = await Promise.all(
+            const valuesArray = await Promise.all(
             media.map(async(m, i) => {
                 let mediaurl = m.mediaurl;
 
@@ -22,7 +22,8 @@ exports.Posts = async ( req, res) => {
                 }
                 return `(${postId}, '${mediaurl}', '${m.mediatype}', ${i})`
         })
-        ).join(", ");
+        );
+        const values = valuesArray.join(", ");
             await db.query(
                 `INSERT INTO post_media (post_id, media_url, media_type, position)
                 VALUES ${values}`
