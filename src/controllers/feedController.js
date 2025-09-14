@@ -1,5 +1,4 @@
 const db = require("../config/db");
-const { post } = require("../routes/authRoutes");
 
 
 exports.Posts = async ( req, res) => {
