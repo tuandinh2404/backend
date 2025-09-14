@@ -1,5 +1,5 @@
 const db = require("../config/db");
-const UploadToS3 = require("./src/util/UploadToS3");
+const UploadToS3 = require("../util/UploadToS3");
 
 
 
