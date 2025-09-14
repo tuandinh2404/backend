@@ -21,8 +21,8 @@ exports.Posts = async ( req, res) => {
                     mediaurl = await UploadToS3(m.buffer, m.originalFilename || `file_${i}`, userId);
                 }
                 return `(${postId}, '${mediaurl}', '${m.mediatype}', ${i})`
-        }).join(", ")
-        );
+        })
+        ).join(", ");
             await db.query(
                 `INSERT INTO post_media (post_id, media_url, media_type, position)
                 VALUES ${values}`
