@@ -12,6 +12,7 @@ require("./ws-server")
 const authRouter = require("./src/routes/authRoutes")
 const userRouter = require("./src/routes/userRoutes")
 const imageRouter = require("./src/routes/imageRoutes")
+const feedRouter = require("./src/routes/feedRoutes")
 
 dotenv.config();
 const jwtSecret = process.env.JWT_SECRET;
@@ -33,6 +34,8 @@ app.use("/api-auth", authRouter )
 
 // Trả về danh sách ảnh (mới nhất trước)
 app.use("/api-image",imageRouter )
+
+app.use("/api-feed", feedRouter)
 
 // API tìm bạn bè qua uid
 app.get("/search-friend", (req, res) => {
