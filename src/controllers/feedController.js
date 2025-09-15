@@ -1,46 +1,49 @@
 const db = require("../config/db");
 const UploadToS3 = require("../util/UploadToS3");
 
-
-
-exports.Posts = async ( req, res) => {
-    const {userId, context, media} = req.body;
-    try {
-        const postResult = await db.query(
-            `INSERT INTO posts (user_id, context)
+exports.Posts = async (req, res) => {
+  const userId = req.user.id;
+  const { context, media } = req.body;
+  try {
+    const postResult = await db.query(
+      `INSERT INTO posts (user_id, context)
             VALUES ($1, $2) RETURNING id`,
-            [userId, context]
-        );
-        const postId = postResult.rows[0].id;
-        if(media && media.length > 0) {
-            const valuesArray = await Promise.all(
-            media.map(async(m, i) => {
-                let mediaurl = m.mediaurl;
+      [userId, context]
+    );
+    const postId = postResult.rows[0].id;
+    if (media && media.length > 0) {
+      const valuesArray = await Promise.all(
+        media.map(async (m, i) => {
+          let mediaurl = m.mediaurl;
 
-                if(m.buffer) {
-                    mediaurl = await UploadToS3(m.buffer, m.originalFilename || `file_${i}`, userId);
-                }
-                return `(${postId}, '${mediaurl}', '${m.mediatype}', ${i})`
-        })
-        );
-        const values = valuesArray.join(", ");
-            await db.query(
-                `INSERT INTO post_media (post_id, media_url, media_type, position)
-                VALUES ${values}`
+          if (m.buffer) {
+            mediaurl = await UploadToS3(
+              m.buffer,
+              m.originalFilename || `file_${i}`,
+              userId
             );
-        }
-        res.json({ success: true, postId })
-    } catch ( err) {
-        console.error("Lỗi bài viết",  err);
-        res.status(500).json({ error: "serrver error post"})
+          }
+          return `(${postId}, '${mediaurl}', '${m.mediatype}', ${i})`;
+        })
+      );
+      const values = valuesArray.join(", ");
+      await db.query(
+        `INSERT INTO post_media (post_id, media_url, media_type, position)
+                VALUES ${values}`
+      );
     }
+    res.json({ success: true, postId });
+  } catch (err) {
+    console.error("Lỗi bài viết", err);
+    res.status(500).json({ error: "serrver error post" });
+  }
 };
 
-exports.getPosts = async(req, res) => {
-    const postId = req.params.postId;
-    try{
-        const result = await db.query(
-            `SELECT 
+exports.getPosts = async (req, res) => {
+  const postId = req.params.postId;
+  try {
+    const result = await db.query(
+      `SELECT 
                 p.id AS post_id,
                 p.context,
                 p.like_count,
@@ -65,14 +68,14 @@ exports.getPosts = async(req, res) => {
                 LEFT JOIN post_media m ON p.id = m.post_id
                 WHERE p.id = $1
                 GROUP BY p.id, u.id, u.uid, u.firstname`,
-            [postId]
-        );
-        if(result.rows.length === 0) {
-            return res.status(404).json({ error: "Post Not Fount"});
-        }
-        res.json(result.rows[0])
-    } catch( err) {
-        console.error(err)
-        res.status(500).json({ error: "Loi server"})
+      [postId]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Post Not Fount" });
     }
-}
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Loi server" });
+  }
+};
