@@ -17,9 +17,9 @@ exports.Posts = async (req, res) => {
     if (req.files && req.files.length > 0) {
       const valuesArray = await Promise.all(
         req.files.map(async (m, i) => {
-            mediaurl = await UploadToS3(
+            const mediaurl = await UploadToS3(
               m.buffer,
-              m.originalFilename || `file_${i}`,
+              m.originalname || `file_${i}`,
               userId
             );
             const mediatype = m.mimetype.startsWith("video")
