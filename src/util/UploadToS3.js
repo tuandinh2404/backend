@@ -9,7 +9,7 @@ const uploadToS3 = async (buffer, originalFilename, uid) => {
   const filename = `${uuidv4()}${ext}`;
   const key = `users/${uid}/${filename}`;
   
-  const ContentType = mine.lookup(ext) || "application/octet-stream";
+  let ContentType = mine.lookup(ext) || "application/octet-stream";
 
     if (ext === ".mp4") {
     ContentType = "video/mp4";
