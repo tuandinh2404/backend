@@ -25,7 +25,7 @@ exports.refreshToken = (req, res) => {
 
       // Tạo access token mới
       const newAccessToken = jwt.sign(
-        { userId: userId, email: results.rows[0].email },
+        { id: userId, email: results.rows[0].email },
         jwtSecret,
         { expiresIn: "7d" }
       );
