@@ -16,7 +16,7 @@ exports.refreshToken = (req, res) => {
     const userId = decoded.userId;
 
     // Kiểm tra refresh token có trùng với token trong DB không
-    const sql = "SELECT * FROM users WHERE id = ? AND refresh_token = ?";
+    const sql = "SELECT * FROM users WHERE id = $1 AND refresh_token = $2";
     db.query(sql, [userId, refreshToken], (err, results) => {
       if (err) return res.status(500).json({ message: "Lỗi server" });
       if (results.rows.length === 0) {
