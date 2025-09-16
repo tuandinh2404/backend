@@ -5,7 +5,6 @@ const { Pool } = require("pg");
 const dotenv = require("dotenv");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const multer = require("multer");
 const path = require("path");
 require("./ws-server")
 
