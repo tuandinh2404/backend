@@ -2,6 +2,9 @@ const db = require("../config/db");
 const UploadToS3 = require("../util/UploadToS3");
 
 exports.Posts = async (req, res) => {
+  console.log("BODY:", req.body);
+  console.log("FILES:", req.files);
+  console.log("USER:", req.user);
   const userId = req.user.id;
   const { context } = req.body;
   try {
