@@ -3,7 +3,7 @@ const UploadToS3 = require("../util/UploadToS3");
 
 exports.Posts = async (req, res) => {
   const userId = req.user.id;
-  const { context, media } = req.body;
+  const { context } = req.body;
   try {
     const postResult = await db.query(
       `INSERT INTO posts (user_id, context)
@@ -11,19 +11,18 @@ exports.Posts = async (req, res) => {
       [userId, context]
     );
     const postId = postResult.rows[0].id;
-    if (media && media.length > 0) {
+    if (req.files && req.files.length > 0) {
       const valuesArray = await Promise.all(
-        media.map(async (m, i) => {
-          let mediaurl = m.mediaurl;
-
-          if (m.buffer) {
+        req.files.map(async (m, i) => {
             mediaurl = await UploadToS3(
               m.buffer,
               m.originalFilename || `file_${i}`,
               userId
             );
-          }
-          return `(${postId}, '${mediaurl}', '${m.mediatype}', ${i})`;
+            const mediatype = m.mimetype.startsWith("video")
+              ? "video"
+              : "image";
+          return `(${postId}, '${mediaurl}', '${mediatype}', ${i})`;
         })
       );
       const values = valuesArray.join(", ");
