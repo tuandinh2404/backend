@@ -1,7 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
-const upload = multer()
+
+
+const upload = multer();
 const feedController = require("../controllers/feedController")
 const AuthMiddleWare = require("../middlewares/AuthMiddleWare");
 
