@@ -55,6 +55,7 @@ exports.getPosts = async (req, res) => {
                 p.createat,
                 u.id AS user_id,
                 u.uid,
+                u.profileimage,
                 u.firstname,
                     COALESCE(
                         json_agg(
