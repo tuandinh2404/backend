@@ -42,6 +42,8 @@ exports.Posts = async (req, res) => {
 };
 
 exports.getPosts = async (req, res) => {
+  const currentUserId = req.user.id;
+  console.log("Current User ID:", currentUserId);
   const postId = req.params.postId;
   try {
     const result = await db.query(
