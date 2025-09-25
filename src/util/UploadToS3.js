@@ -4,6 +4,9 @@ const path = require("path");
 const mine = require("mime-types");
 const { PutObjectCommand } = require("@aws-sdk/client-s3");
 
+
+const CLOUDFRONT_DOMAIN = process.env.CLOUDFRONT_DOMAIN || null;
+
 const uploadToS3 = async (buffer, originalFilename, uid) => {
   const ext = path.extname(originalFilename).toLowerCase() || ".jpg";
   const filename = `${uuidv4()}${ext}`;
@@ -32,7 +35,7 @@ const uploadToS3 = async (buffer, originalFilename, uid) => {
 });
 
   const result = await s3.send(new PutObjectCommand(params));
-  const Location = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+  const Location = `${CLOUDFRONT_DOMAIN}/${key}`;
 
   console.log("✅ Upload lên S3:", Location);
   return Location;
