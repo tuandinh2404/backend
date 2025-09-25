@@ -3,6 +3,8 @@ const { v4: uuidv4 } = require("uuid");
 const path = require("path");
 const mine = require("mime-types");
 const { PutObjectCommand } = require("@aws-sdk/client-s3");
+require("dotenv").config();
+
 
 
 const CLOUDFRONT_DOMAIN = process.env.CLOUDFRONT_DOMAIN || null;
