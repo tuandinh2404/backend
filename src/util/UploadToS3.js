@@ -43,7 +43,7 @@ const uploadToS3 = async (buffer, originalFilename, uid) => {
   const result = await s3.send(new PutObjectCommand(params));
   const Location = `${CLOUDFRONT_DOMAIN}/${key}`;
 
-  console.log("✅ Upload lên S3:", Location);
+  console.log("✅ Upload lên S3 cloudfront:", Location);
   return Location;
 };
 
