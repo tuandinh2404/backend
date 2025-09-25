@@ -10,6 +10,9 @@ require("dotenv").config();
 const CLOUDFRONT_DOMAIN = process.env.CLOUDFRONT_DOMAIN || 
   `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com`;
 
+  console.log("🌍 CLOUDFRONT_DOMAIN =", process.env.CLOUDFRONT_DOMAIN);
+
+
 const uploadToS3 = async (buffer, originalFilename, uid) => {
   const ext = path.extname(originalFilename).toLowerCase() || ".jpg";
   const filename = `${uuidv4()}${ext}`;
