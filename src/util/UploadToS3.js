@@ -10,7 +10,7 @@ require("dotenv").config();
 const CLOUDFRONT_DOMAIN = process.env.CLOUDFRONT_DOMAIN || 
   `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com`;
 
-  console.log("🌍 CLOUDFRONT_DOMAIN =", process.env.CLOUDFRONT_DOMAIN);
+  console.log("🌍 CLOUDFRONT_DOMAIN =", CLOUDFRONT_DOMAIN);
 
 
 const uploadToS3 = async (buffer, originalFilename, uid) => {
@@ -34,12 +34,7 @@ const uploadToS3 = async (buffer, originalFilename, uid) => {
     Body: buffer,
     ContentType: ContentType,
   };
-  console.log("🔐 ENV:", {
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secret: process.env.AWS_SECRET_ACCESS_KEY,
-  region: process.env.AWS_REGION,
-});
-
+  
   const result = await s3.send(new PutObjectCommand(params));
   const Location = `${CLOUDFRONT_DOMAIN}/${key}`;
 
