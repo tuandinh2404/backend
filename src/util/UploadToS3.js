@@ -7,8 +7,7 @@ require("dotenv").config();
 
 
 
-const CLOUDFRONT_DOMAIN = process.env.CLOUDFRONT_DOMAIN || 
-  `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com`;
+const CLOUDFRONT_DOMAIN = process.env.CLOUDFRONT_DOMAIN ||`https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com`;
 
   console.log("🌍 CLOUDFRONT_DOMAIN =", CLOUDFRONT_DOMAIN);
 
