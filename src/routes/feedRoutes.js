@@ -10,4 +10,5 @@ const AuthMiddleWare = require("../middlewares/AuthMiddleWare");
 router.post("/posts", AuthMiddleWare, upload.array("media"), feedController.Posts)
 router.get("/posts", AuthMiddleWare, feedController.getAllPosts)
 router.get("/posts/:postId", AuthMiddleWare, feedController.getPosts)
+router.delete("/posts/:postId", AuthMiddleWare, feedController.DeletePost)
 module.exports = router;
