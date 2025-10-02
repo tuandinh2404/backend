@@ -17,14 +17,12 @@ exports.Posts = async (req, res) => {
     if (req.files && req.files.length > 0) {
       const valuesArray = await Promise.all(
         req.files.map(async (m, i) => {
-            const mediaurl = await UploadToS3(
-              m.buffer,
-              m.originalname || `file_${i}`,
-              userId
-            );
-            const mediatype = m.mimetype.startsWith("video")
-              ? "video"
-              : "image";
+          const mediaurl = await UploadToS3(
+            m.buffer,
+            m.originalname || `file_${i}`,
+            userId
+          );
+          const mediatype = m.mimetype.startsWith("video") ? "video" : "image";
           return `(${postId}, '${mediaurl}', '${mediatype}', ${i})`;
         })
       );
@@ -85,7 +83,6 @@ exports.getPosts = async (req, res) => {
   }
 };
 
-
 exports.getAllPosts = async (req, res) => {
   try {
     const result = await db.query(
@@ -115,12 +112,34 @@ exports.getAllPosts = async (req, res) => {
                 LEFT JOIN post_media m ON p.id = m.post_id
                 GROUP BY p.id, u.id, u.uid, u.firstname
                 ORDER BY p.createat DESC
-                `,
+                `
     );
 
     res.json(result.rows);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Loi server" });
+  }
+};
+
+exports.DeletePost = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const postId = req.params.postId;
+
+    const check = await db.qyery("SELECT * FROM posts WHERE id = $1", [postId]);
+    if (check.rows.lenth === 0) {
+      return res.status(404).json({ error: "Post No Exist" });
+    }
+
+    if (check.rows[0].user_id !== userId) {
+      return res.status(403).json({ error: "Khong co quyen xoa bai viet nay" });
+    }
+
+    await db.query("DELETE FROM posts WHERE id = $1", [postId]);
+    res.json({ success: true, message: "Da xoa bai viet" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Loi server" })
   }
 };
