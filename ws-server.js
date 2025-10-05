@@ -71,9 +71,6 @@ wss.on("connection", (ws) => {
   });
 });
 
-ws.on("error", (error) => {
-  console.error("❌ Lỗi WebSocket:", error);
-})
 
 const heartbeat = setInterval(() => {
   wss.clients.forEach((ws) => {
