@@ -67,7 +67,11 @@ exports.getPosts = async (req, res) => {
                             )
                         ) FILTER (WHERE m.id IS NOT NULL),
                          '[]'
-                    ) AS media
+                    ) AS media,
+                    EXISTS (
+                      SELECT 1 FROM post_like
+                      WHERE post_id = p.id AND user_id = $2
+                    ) AS is_liked
                 FROM posts p 
                 JOIN users u ON p.user_id = u.id
                 LEFT JOIN post_media m ON p.id = m.post_id
@@ -109,7 +113,11 @@ exports.getAllPosts = async (req, res) => {
                             )
                         ) FILTER (WHERE m.id IS NOT NULL),
                          '[]'
-                    ) AS media
+                    ) AS media,
+                    EXISTS (
+                      SELECT 1 FROM post_like
+                      WHERE post_id = p.id AND user_id = $1
+                    ) AS is_liked
                 FROM posts p 
                 JOIN users u ON p.user_id = u.id
                 LEFT JOIN post_media m ON p.id = m.post_id
@@ -199,11 +207,11 @@ exports.toggleLike = async (req, res) => {
 
         broadcast({
           type: "LIKE_UPDATE",
-          postId,
-          likeCount,
-          userId,
+          postId: postId.toString(),
+          likeCount: likeCount,
+          userId: userId.toString(),
           isLiked,
-        }, userId !== null ? [userId] : []); // Gửi thông báo đến tất cả trừ người thực hiện hành động
+        }, userId.toString()); // Gửi thông báo đến tất cả trừ người thực hiện hành động
         res.json({ success: true, likeCount, isLiked });
   } catch( err) {
     await db.query("ROLLBACK");
