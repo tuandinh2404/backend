@@ -1,5 +1,7 @@
 const db = require("../config/db");
 const UploadToS3 = require("../util/UploadToS3");
+const s3 = require("../config/S3");
+const { broadcast } = require("../../ws-server");
 
 exports.Posts = async (req, res) => {
   console.log("BODY:", req.body);
@@ -71,7 +73,7 @@ exports.getPosts = async (req, res) => {
                 LEFT JOIN post_media m ON p.id = m.post_id
                 WHERE p.id = $1
                 GROUP BY p.id, u.id, u.uid, u.firstname`,
-      [postId]
+      [postId, currentUserId]
     );
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Post Not Fount" });
@@ -84,6 +86,7 @@ exports.getPosts = async (req, res) => {
 };
 
 exports.getAllPosts = async (req, res) => {
+  const currentUserId = req.user.id;
   try {
     const result = await db.query(
       `SELECT 
@@ -111,8 +114,8 @@ exports.getAllPosts = async (req, res) => {
                 JOIN users u ON p.user_id = u.id
                 LEFT JOIN post_media m ON p.id = m.post_id
                 GROUP BY p.id, u.id, u.uid, u.firstname
-                ORDER BY p.createat DESC
-                `
+                ORDER BY p.createat DESC`,
+                [ currentUserId ]
     );
 
     res.json(result.rows);
@@ -122,24 +125,89 @@ exports.getAllPosts = async (req, res) => {
   }
 };
 
-exports.DeletePost = async (req, res) => {
+// exports.DeletePost = async (req, res) => {
+//   try {
+//     const userId = req.user.id;
+//     const postId = req.params.postId;
+
+//     const check = await db.query("SELECT * FROM posts WHERE id = $1", [postId]);
+//     if (check.rows.length === 0) {
+//       return res.status(404).json({ error: "Post No Exist" });
+//     }
+
+//     if (check.rows[0].user_id !== userId) {
+//       return res.status(403).json({ error: "Khong co quyen xoa bai viet nay" });
+//     }
+
+//     const mediaRes = await client.query("SELECT * FROM post_media WHERE post_id = $1", [postId]);
+
+//     await db.query("BEGIN");
+//     await db.query("DELETE FROM post_media WHERE post_id = $1", [postId]);
+//     await db.query("DELETE FROM post_like WHERE post_id = $1", [postId]);
+//     await db.query("DELETE FROM post_comments WHERE post_id = $1", [postId]);
+//     await db.query("DELETE FROM posts WHERE id = $1", [postId]);
+//     await db.query("COMMIT");
+
+//     for(let row of mediaRes.rows) {
+//       const key = row.url.split('/').pop();
+//       await s3.deleteObject
+//     }
+
+//     res.json({ success: true, message: "Da xoa bai viet" });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ error: "Loi server" })
+//   }
+// };
+exports.toggleLike = async (req, res) => {
+  const { postId} = req.params
+  const userId = req.user.id;
+
   try {
-    const userId = req.user.id;
-    const postId = req.params.postId;
+    await db.query("BEGIN");
 
-    const check = await db.qyery("SELECT * FROM posts WHERE id = $1", [postId]);
-    if (check.rows.lenth === 0) {
-      return res.status(404).json({ error: "Post No Exist" });
-    }
+    const result = await db.query(`
+      WITH like_action AS (
+        INSERT INTO post_like (post_id, user_id)
+        VALUES ($1, $2)
+        ON CONFLICT (post_id, user_id) DO NOTHING
+        RETURNING 1
+      ),
+      unlike_action AS (
+        DELETE FROM post_like
+        WHERE post_id = $1 AND user_id = $2
+        AND NOT EXISTS (SELECT 1 FROM like_action)
+        RETURNING -1
+      )
+      SELECT COALESCE(
+        (SELECT 1 FROM like_action),
+        (SELECT -1 FROM unlike_action)
+      ) as action
+      `, [postId, userId]);
+      const action = result.rows[0]?.action || 0;
 
-    if (check.rows[0].user_id !== userId) {
-      return res.status(403).json({ error: "Khong co quyen xoa bai viet nay" });
-    }
+      const updateResult = await db.query(`
+        UPDATE posts
+        SET like_count = GREATEST(like_count + $1, 0)
+        WHERE id = $2
+        RETURNING like_count
+        `, [action, postId]);
+        await db.query("COMMIT");
 
-    await db.query("DELETE FROM posts WHERE id = $1", [postId]);
-    res.json({ success: true, message: "Da xoa bai viet" });
-  } catch (err) {
+        const likeCount = updateResult.rows[0].like_count;
+        const isLiked = action === 1;
+
+        broadcast({
+          type: "LIKE_UPDATE",
+          postId,
+          likeCount,
+          userId,
+          isLiked,
+        }, userId !== null ? [userId] : []); // Gửi thông báo đến tất cả trừ người thực hiện hành động
+        res.json({ success: true, likeCount, isLiked });
+  } catch( err) {
+    await db.query("ROLLBACK");
     console.error(err);
-    res.status(500).json({ error: "Loi server" })
+    res.status(500).json({ error: "Loi server" });
   }
 };
