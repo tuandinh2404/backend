@@ -1,12 +1,12 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const db = require("../config/db")
+const db = require("../config/db");
 
 const jwtSecret = process.env.JWT_SECRET;
 
 // API đăng ký
 exports.register = async (req, res) => {
-  const { email, password, firstName,  uid } = req.body;
+  const { email, password, firstName, uid } = req.body;
   const lastName = req.body.lastName || ""; // Nếu lastName không bắt buộc, có thể để trống
   if (!email || !password || !firstName || !uid) {
     return res.status(400).json({ message: "Vui lòng nhập đầy đủ thông tin" });
@@ -71,7 +71,6 @@ exports.login = async (req, res) => {
     const refreshToken = jwt.sign({ userId: user.id }, jwtSecret, {
       expiresIn: "30d",
     });
-
 
     const sqlUpdate = "UPDATE users SET refresh_token = $1 WHERE id = $2";
     db.query(sqlUpdate, [refreshToken, user.id], (err2) => {
@@ -155,91 +154,114 @@ exports.checkEmailLogin = (req, res) => {
 //Api đăng xuất
 exports.LogOut = (req, res) => {
   const { refreshToken } = req.body;
-  if(!refreshToken) return res.status(400).json({ message:"Thiếu refteshtoken"}); 
+  if (!refreshToken)
+    return res.status(400).json({ message: "Thiếu refteshtoken" });
   const sql = "UPDATE users SET refresh_token = NULL WHERE refresh_token = $1";
 
   db.query(sql, [refreshToken], (err, result) => {
+    if (err) return res.status(500).json({ message: "Lỗi server khi logout" });
+    if (result.rowCount === 0)
+      return res.status(400).json({ message: "token không hợp lệ" });
 
-    if (err) 
-        return res.status(500).json({ message: "Lỗi server khi logout" });
-    if (result.rowCount === 0 )
-        return res.status(400).json({message:"token không hợp lệ"})
-    
     res.json({ message: "Đăng xuất thành công" });
-  
-});
+  });
 };
 
 //Lấy uid
 exports.getUID = (req, res) => {
   const authHeader = req.headers["authorization"];
-    if (!authHeader) {
-      return res.status(401).json({ message: "Chưa có token" });
+  if (!authHeader) {
+    return res.status(401).json({ message: "Chưa có token" });
+  }
+
+  const token = authHeader.split(" ")[1];
+  jwt.verify(token, jwtSecret, (err, decoded) => {
+    if (err) {
+      return res.status(403).json({ message: "Token không hợp lệ" });
     }
-  
-    const token = authHeader.split(" ")[1];
-    jwt.verify(token, jwtSecret, (err, decoded) => {
-      if (err) {
-        return res.status(403).json({ message: "Token không hợp lệ" });
+    const userId = decoded.userId; // lấy userId từ token đã giải mã
+
+    // Truy vấn database để lấy uid dựa trên userId
+    const sql = "SELECT uid FROM users WHERE id = $1";
+    db.query(sql, [userId], (err, results) => {
+      if (err) return res.status(500).json({ message: "Lỗi server" });
+      if (results.rows.length === 0) {
+        return res.status(404).json({ message: "Không tìm thấy uid" });
       }
-      const userId = decoded.userId; // lấy userId từ token đã giải mã
-  
-      // Truy vấn database để lấy uid dựa trên userId
-      const sql = "SELECT uid FROM users WHERE id = $1";
-      db.query(sql, [userId], (err, results) => {
-        if (err) return res.status(500).json({ message: "Lỗi server" });
-        if (results.rows.length === 0) {
-          return res.status(404).json({ message: "Không tìm thấy uid" });
-        }
-        res.json({ uid: results.rows[0].uid });
-      });
+      res.json({ uid: results.rows[0].uid });
     });
-}
+  });
+};
 
 //API profileImage
 exports.uploadProfile = (req, res) => {
   const authHeader = req.headers["authorization"];
-    if (!authHeader) {
-      return res.status(401).json({ message: "Chưa có token" });
-    }
-  
-    const token = authHeader.split(" ")[1];
-    jwt.verify(token, jwtSecret, (err, decoded) => {
-      if (err) {
-        return res.status(403).json({ message: "Token không hợp lệ" });
-      }
-  
-      const userId = decoded.userId;
-  
-      if (!req.file) {
-        return res.status(400).json({ message: "Thiếu file profileImage" });
-      }
-  
-      const filePath = `uploads/profile_images/${req.file.filename}`;
+  if (!authHeader) {
+    return res.status(401).json({ message: "Chưa có token" });
+  }
 
-      const sql = "UPDATE users SET profileImage = $1 WHERE id = $2";
-      db.query(sql, [filePath, userId], (err, result) => {
-        if (err) {
-          console.error("Lỗi update profileImage:", err);
-          return res.status(500).json({ message: "Lỗi server" });
-        }
-  
-        const fullUrl = `${req.protocol}://${req.get("host")}/${filePath}`;
-        res.json({ message: "Cập nhật ảnh đại diện thành công", imageUrl: fullUrl });
+  const token = authHeader.split(" ")[1];
+  jwt.verify(token, jwtSecret, (err, decoded) => {
+    if (err) {
+      return res.status(403).json({ message: "Token không hợp lệ" });
+    }
+
+    const userId = decoded.userId;
+
+    if (!req.file) {
+      return res.status(400).json({ message: "Thiếu file profileImage" });
+    }
+
+    const filePath = `uploads/profile_images/${req.file.filename}`;
+
+    const sql = "UPDATE users SET profileImage = $1 WHERE id = $2";
+    db.query(sql, [filePath, userId], (err, result) => {
+      if (err) {
+        console.error("Lỗi update profileImage:", err);
+        return res.status(500).json({ message: "Lỗi server" });
+      }
+
+      const fullUrl = `${req.protocol}://${req.get("host")}/${filePath}`;
+      res.json({
+        message: "Cập nhật ảnh đại diện thành công",
+        imageUrl: fullUrl,
       });
     });
-}
-
-exports.getUsers = (req, res) => {
-  const uid = req.params.uid;
-  const sql =
-    "SELECT id, email, firstName, lastName, uid,  profileImage FROM users WHERE uid = $1";
-  db.query(sql, [uid], (err, results) => {
-    if (err)
-      return res.status(500).json({ message: "Lỗi server khi lấy users", error: err });
-    if(results.rows.length === 0) 
-      return res.status(404).json({message:"user không tồn tại"}) 
-
-    res.json(results.rows[0]);
   });
-}
+};
+
+exports.getUsers = async (req, res) => {
+  const uid = req.params.uid;
+  const currentUserId = req.user.id;
+  const sql = `SELECT 
+      u.id, 
+      u.email, 
+      u.firstName, 
+      u.lastName, 
+      u.uid,  
+      u.profileImage,
+      p.bio,
+      (SELECT COUNT(*) FROM follows f1 WHERE f1.followed_id = u.id) AS followes_count,
+      (SELECT COUNT(*) FROM follows f2 WHERE f2.follower_id = u.id) AS following_count,
+      CASE
+        WHEN u.id = $2 THEN NULL
+        ELSE EXISTS (
+          SELECT 1 FROM follows
+          WHERE follower_id = $2 AND followin_id = u.id
+          )
+      END AS is_following
+      FROM users u 
+      LEFT JOIN profile p ON p.user_id = u.id
+      WHERE u.uid = $1`;
+  try {
+    const result = await db.query(sql, [uid, currentUserId]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "user không tồn tại" });
+    }
+    res.json(results.rows[0]);
+  } catch (err) {
+    console.error("Lỗi lấy thông tin user:", err);
+    res.status(500).json({ message: "Lỗi server" });
+  }
+};
