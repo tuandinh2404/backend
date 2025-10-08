@@ -241,13 +241,13 @@ exports.getUsers = async (req, res) => {
       u.uid,  
       u.profileImage,
       p.bio,
-      (SELECT COUNT(*) FROM follows f1 WHERE f1.followed_id = u.id) AS followes_count,
+      (SELECT COUNT(*) FROM follows f1 WHERE f1.followed_id = u.id) AS followers_count,
       (SELECT COUNT(*) FROM follows f2 WHERE f2.follower_id = u.id) AS following_count,
       CASE
         WHEN u.id = $2 THEN NULL
         ELSE EXISTS (
           SELECT 1 FROM follows
-          WHERE follower_id = $2 AND followin_id = u.id
+          WHERE follower_id = $2 AND following_id = u.id
           )
       END AS is_following
       FROM users u 
