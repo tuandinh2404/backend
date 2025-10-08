@@ -241,7 +241,7 @@ exports.getUsers = async (req, res) => {
       u.uid,  
       u.profileImage,
       p.bio,
-      (SELECT COUNT(*) FROM follows f1 WHERE f1.followed_id = u.id) AS followers_count,
+      (SELECT COUNT(*) FROM follows f1 WHERE f1.following_id = u.id) AS followers_count,
       (SELECT COUNT(*) FROM follows f2 WHERE f2.follower_id = u.id) AS following_count,
       CASE
         WHEN u.id = $2 THEN NULL
