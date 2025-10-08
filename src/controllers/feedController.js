@@ -267,7 +267,7 @@ exports.getPostsUser = async (req, res) => {
     );
     console.log("📦 Kết quả query:", result.rows.length);
 
-    res.json(result.rows[0]);
+    res.json(result.rows);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Loi server" });
