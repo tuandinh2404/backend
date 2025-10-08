@@ -259,7 +259,7 @@ exports.getUsers = async (req, res) => {
     if (result.rows.length === 0) {
       return res.status(404).json({ message: "user không tồn tại" });
     }
-    res.json(results.rows[0]);
+    res.json(result.rows[0]);
   } catch (err) {
     console.error("Lỗi lấy thông tin user:", err);
     res.status(500).json({ message: "Lỗi server" });
