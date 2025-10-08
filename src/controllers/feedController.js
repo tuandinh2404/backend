@@ -263,7 +263,7 @@ exports.getPostsUser = async (req, res) => {
                 GROUP BY p.id, u.id, u.uid, u.firstname
                 ORDER BY p.createat DESC
                 LIMIT $3 OFFSET $4`,
-      [userId, currentUserId, limit, offset]
+      [currentUserId, userId, limit, offset]
     );
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Post Not Found" });
