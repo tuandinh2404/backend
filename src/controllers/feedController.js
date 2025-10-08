@@ -225,7 +225,7 @@ exports.toggleLike = async (req, res) => {
 exports.getPostsUser = async (req, res) => {
   const currentUserId = req.user.id;
   console.log("Current User ID:", currentUserId);
-  const { userId } = req.params;
+  const { userId } = parseInt(req.params.userId);
   const page = parseInt(req.query.page) || 0;
   const limit = parseInt(req.query.limit) || 20;
   const offset = page * limit;
@@ -259,11 +259,11 @@ exports.getPostsUser = async (req, res) => {
                 FROM posts p 
                 JOIN users u ON p.user_id = u.id
                 LEFT JOIN post_media m ON p.id = m.post_id
-                WHERE p.user_id = $2
+                WHERE p.user_id = $1
                 GROUP BY p.id, u.id, u.uid, u.firstname
                 ORDER BY p.createat DESC
                 LIMIT $3 OFFSET $4`,
-      [currentUserId, userId, limit, offset]
+      [userId, currentUserId, limit, offset]
     );
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Post Not Found" });
