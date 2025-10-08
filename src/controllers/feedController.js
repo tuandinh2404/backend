@@ -225,7 +225,7 @@ exports.toggleLike = async (req, res) => {
 exports.getPostsUser = async (req, res) => {
   const currentUserId = req.user.id;
   console.log("Current User ID:", currentUserId);
-  const { userId } = parseInt(req.params.userId);
+  const userId = parseInt(req.params.userId);
   const page = parseInt(req.query.page) || 0;
   const limit = parseInt(req.query.limit) || 20;
   const offset = page * limit;
