@@ -265,9 +265,8 @@ exports.getPostsUser = async (req, res) => {
                 LIMIT $3 OFFSET $4`,
       [userId, currentUserId, limit, offset]
     );
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Post Not Found" });
-    }
+    console.log("📦 Kết quả query:", result.rows.length);
+
     res.json(result.rows[0]);
   } catch (err) {
     console.error(err);
