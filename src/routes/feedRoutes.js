@@ -12,4 +12,5 @@ router.get("/posts", AuthMiddleWare, feedController.getAllPosts)
 router.get("/posts/:postId", AuthMiddleWare, feedController.getPosts)
 // router.delete("/posts/:postId", AuthMiddleWare, feedController.DeletePost)
 router.post("/posts/:postId/like", AuthMiddleWare, feedController.toggleLike)
+router.get("/posts/:userId/user-post", AuthMiddleWare, feedController.getPostsUser)
 module.exports = router;

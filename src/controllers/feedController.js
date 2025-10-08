@@ -3,6 +3,8 @@ const UploadToS3 = require("../util/UploadToS3");
 const s3 = require("../config/S3");
 const { broadcast } = require("../../ws-server");
 
+
+//Thêm bài viết
 exports.Posts = async (req, res) => {
   console.log("BODY:", req.body);
   console.log("FILES:", req.files);
@@ -215,6 +217,59 @@ exports.toggleLike = async (req, res) => {
         res.json({ success: true, likeCount, isLiked });
   } catch( err) {
     await db.query("ROLLBACK");
+    console.error(err);
+    res.status(500).json({ error: "Loi server" });
+  }
+};
+
+exports.getPostsUser = async (req, res) => {
+  const currentUserId = req.user.id;
+  console.log("Current User ID:", currentUserId);
+  const { userId } = req.params;
+  const page = parseInt(req.query.page) || 0;
+  const limit = parseInt(req.query.limit) || 20;
+  const offset = page * limit;
+  try {
+    const result = await db.query(
+      `SELECT 
+                p.id AS post_id,
+                p.context,
+                p.like_count,
+                p.comment_count,
+                p.createat,
+                u.id AS user_id,
+                u.uid,
+                u.profileimage,
+                u.firstname,
+                    COALESCE(
+                        json_agg(
+                            json_build_object(
+                                'id', m.id,
+                                'url', m.media_url,
+                                'type', m.media_type,
+                                'position', m.position
+                            )
+                        ) FILTER (WHERE m.id IS NOT NULL),
+                         '[]'
+                    ) AS media,
+                    EXISTS (
+                      SELECT 1 FROM post_like
+                      WHERE post_id = p.id AND user_id = $2
+                    ) AS is_liked
+                FROM posts p 
+                JOIN users u ON p.user_id = u.id
+                LEFT JOIN post_media m ON p.id = m.post_id
+                WHERE p.user_id = $2
+                GROUP BY p.id, u.id, u.uid, u.firstname
+                ORDER BY p.createat DESC
+                LIMIT $3 OFFSET $4`,
+      [userId, currentUserId, limit, offset]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Post Not Found" });
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Loi server" });
   }
