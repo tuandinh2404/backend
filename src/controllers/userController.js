@@ -1,6 +1,9 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const db = require("../config/db");
+const multer = require("multer");
+const uploadToS3 = require("../util/UploadToS3");
+const upload = multer({ storage: multer.memoryStorage() });
 
 const jwtSecret = process.env.JWT_SECRET;
 
@@ -194,40 +197,31 @@ exports.getUID = (req, res) => {
 };
 
 //API profileImage
-exports.uploadProfile = (req, res) => {
-  const authHeader = req.headers["authorization"];
-  if (!authHeader) {
-    return res.status(401).json({ message: "Chưa có token" });
-  }
+exports.uploadProfile = async(req, res) => {
+  try {
+  const {  id, uid } = req.user;
+  const file = req.file;
 
-  const token = authHeader.split(" ")[1];
-  jwt.verify(token, jwtSecret, (err, decoded) => {
-    if (err) {
-      return res.status(403).json({ message: "Token không hợp lệ" });
-    }
-
-    const userId = decoded.userId;
-
-    if (!req.file) {
+    if (!file) {
       return res.status(400).json({ message: "Thiếu file profileImage" });
     }
 
-    const filePath = `uploads/profile_images/${req.file.filename}`;
+    const imageProfile = await uploadToS3(file.buffer, file.originalname, uid);
 
-    const sql = "UPDATE users SET profileImage = $1 WHERE id = $2";
-    db.query(sql, [filePath, userId], (err, result) => {
-      if (err) {
-        console.error("Lỗi update profileImage:", err);
-        return res.status(500).json({ message: "Lỗi server" });
-      }
+    const sql = `
+    UPDATE users 
+    SET profileimage = $1 
+    WHERE id = $2
+    REUTURNING profileimage`;
 
-      const fullUrl = `${req.protocol}://${req.get("host")}/${filePath}`;
-      res.json({
-        message: "Cập nhật ảnh đại diện thành công",
-        imageUrl: fullUrl,
-      });
-    });
-  });
+    const result = await db.query(sql, [imageProfile, id]);
+
+    res.json({ message: "Upload ảnh thành công", profileImage: result.rows[0].profileimage });
+
+  } catch (err) {
+    console.error("Lỗi upload ảnh:", err);
+    res.status(500).json({ message: "Lỗi server" });
+  }
 };
 
 exports.getUsers = async (req, res) => {
@@ -239,7 +233,7 @@ exports.getUsers = async (req, res) => {
       u.firstname, 
       u.lastName, 
       u.uid,  
-      u.profileImage,
+      u.profileimage,
       p.bio,
       (SELECT COUNT(*) FROM follows f1 WHERE f1.following_id = u.id) AS followers_count,
       (SELECT COUNT(*) FROM follows f2 WHERE f2.follower_id = u.id) AS following_count,
