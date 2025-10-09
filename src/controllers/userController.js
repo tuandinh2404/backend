@@ -236,7 +236,7 @@ exports.getUsers = async (req, res) => {
   const sql = `SELECT 
       u.id, 
       u.email, 
-      u.firstName, 
+      u.firstname, 
       u.lastName, 
       u.uid,  
       u.profileImage,
