@@ -216,7 +216,7 @@ exports.uploadProfile = async(req, res) => {
 
     const result = await db.query(sql, [imageProfile, id]);
 
-    res.json({ message: "Upload ảnh thành công", profileImage: result.rows[0].profileimage });
+    res.json({profileImage: result.rows[0].profileimage });
 
   } catch (err) {
     console.error("Lỗi upload ảnh:", err);
