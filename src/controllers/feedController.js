@@ -140,7 +140,32 @@ exports.getAllPosts = async (req, res) => {
                 ORDER BY p.createat DESC`,
                 [ currentUserId ]
     );
+    console.log('\n📊 QUERY RESULT:');
+    console.log('Total posts:', result.rows.length);
 
+     if (result.rows.length > 0) {
+      console.log('\nFirst 3 posts:');
+      result.rows.slice(0, 3).forEach((post, i) => {
+        console.log(`  [${i}] Post ${post.post_id}:`);
+        console.log(`      - is_liked: ${post.is_liked}`);
+        console.log(`      - like_count: ${post.like_count}`);
+      });
+    }
+
+    const likesCheck = await db.query(
+      `SELECT post_id FROM post_like WHERE user_id = $1 ORDER BY post_id`,
+      [currentUserId]
+    );
+    
+    console.log('\n💖 USER LIKES IN DB:');
+    console.log('Total likes by user:', likesCheck.rows.length);
+    if (likesCheck.rows.length > 0) {
+      console.log('Liked post IDs:', likesCheck.rows.map(r => r.post_id).join(', '));
+    } else {
+      console.log('⚠️ NO LIKES FOUND!');
+    }
+
+    console.log('==========================================\n');
     res.json(result.rows);
   } catch (err) {
     console.error(err);
