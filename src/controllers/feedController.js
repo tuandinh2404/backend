@@ -92,7 +92,7 @@ exports.getPosts = async (req, res) => {
 };
 
 exports.getAllPosts = async (req, res) => {
-  const currentUserId = req.user.id;
+  const currentUserId = parseInt(req.user.id);
   try {
     const result = await db.query(
       `SELECT 
@@ -170,8 +170,8 @@ exports.getAllPosts = async (req, res) => {
 //   }
 // };
 exports.toggleLike = async (req, res) => {
-  const { postId} = req.params
-  const userId = req.user.id;
+  const postId = parseInt(req.params.postId)
+  const userId = parseInt(req.user.id);
 
   try {
     await db.query("BEGIN");
