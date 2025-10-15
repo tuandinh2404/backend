@@ -92,7 +92,20 @@ exports.getPosts = async (req, res) => {
 };
 
 exports.getAllPosts = async (req, res) => {
+  console.log('\n==========================================');
+  console.log('📝 GET ALL POSTS REQUEST');
+  console.log('==========================================');
+  console.log('req.user (raw):', JSON.stringify(req.user, null, 2));
+  console.log('req.user.id:', req.user.id);
+  console.log('Type of req.user.id:', typeof req.user.id);
+  
   const currentUserId = parseInt(req.user.id);
+
+  console.log('currentUserId (after parseInt):', currentUserId);
+  console.log('Type:', typeof currentUserId);
+  console.log('==========================================\n');
+  
+  
   try {
     const result = await db.query(
       `SELECT 
