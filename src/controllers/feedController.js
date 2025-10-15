@@ -105,7 +105,7 @@ exports.getAllPosts = async (req, res) => {
   console.log('Type:', typeof currentUserId);
   console.log('==========================================\n');
   
-  
+
   try {
     const result = await db.query(
       `SELECT 
@@ -185,6 +185,13 @@ exports.getAllPosts = async (req, res) => {
 exports.toggleLike = async (req, res) => {
   const postId = parseInt(req.params.postId)
   const userId = parseInt(req.user.id);
+
+  console.log('\n💖 ==========================================');
+  console.log('TOGGLE LIKE REQUEST');
+  console.log('==========================================');
+  console.log('Post ID:', postId, typeof postId);
+  console.log('User ID:', userId, typeof userId);
+  console.log('==========================================\n');
 
   try {
     await db.query("BEGIN");
