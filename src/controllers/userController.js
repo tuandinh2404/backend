@@ -270,14 +270,15 @@ exports.updateUserProfile = async (req, res) => {
           uid = COALESCE($2, uid),
           profileimage = $3,
           createat = NOW()
-    WHERE id = $5`,
+    WHERE id = $4`,
       [firstname, uid, profileimage, currentUserId]
     );
     await db.query(
       `INSERT INTO profile (user_id, bio, updated_at)
         VALUES ($1, $2, NOW())
         ON CONFLICT (user_id)
-        DO UPDATE SET bio = EXCLUDED.bio, uidated_at = NOW()`
+        DO UPDATE SET bio = EXCLUDED.bio, uidated_at = NOW()`,
+        [currentUserId, bio]
     );
 
     const sql = `
@@ -287,7 +288,7 @@ exports.updateUserProfile = async (req, res) => {
         u.firstname,
         u.email,
         u.profileimage,
-        u.bio
+        p.bio
       FROM users u
       LEFT JOIN profile p ON p.user_id = u.id
       WHERE u.id = $1
@@ -296,7 +297,7 @@ exports.updateUserProfile = async (req, res) => {
     const result = await db.query(sql, [currentUserId])
     res.json(result.rows[0]);
   } catch (err) {
-    console.error("Loi cap nhat ho so")
+    console.error("Loi cap nhat ho so", err.message)
     res.status(500).json({message: "Loi server"})
   }
 };
