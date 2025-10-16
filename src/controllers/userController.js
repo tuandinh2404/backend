@@ -230,7 +230,6 @@ exports.getUsers = async (req, res) => {
       u.id, 
       u.email, 
       u.firstname, 
-      u.lastName, 
       u.uid,  
       u.profileimage,
       p.bio,
