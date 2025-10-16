@@ -296,7 +296,7 @@ exports.updateUserProfile = async (req, res) => {
     const result = await db.query(sql, [currentUserId])
     res.json(result.rows[0]);
   } catch (err) {
-    console.err("Loi cap nhat ho so")
+    console.error("Loi cap nhat ho so")
     res.status(500).json({message: "Loi server"})
   }
 };
