@@ -269,7 +269,7 @@ exports.updateUserProfile = async (req, res) => {
       SET firstname = $1, 
           uid = COALESCE($2, uid),
           profileimage = $3,
-          createat = NOW()
+          created_at = NOW()
     WHERE id = $4`,
       [firstname, uid, profileimage, currentUserId]
     );
@@ -277,7 +277,7 @@ exports.updateUserProfile = async (req, res) => {
       `INSERT INTO profile (user_id, bio, updated_at)
         VALUES ($1, $2, NOW())
         ON CONFLICT (user_id)
-        DO UPDATE SET bio = EXCLUDED.bio, uidated_at = NOW()`,
+        DO UPDATE SET bio = EXCLUDED.bio, updated_at = NOW()`,
         [currentUserId, bio]
     );
 
