@@ -197,10 +197,10 @@ exports.getUID = (req, res) => {
 };
 
 //API profileImage
-exports.uploadProfile = async(req, res) => {
+exports.uploadProfile = async (req, res) => {
   try {
-  const {  id, uid } = req.user;
-  const file = req.file;
+    const { id, uid } = req.user;
+    const file = req.file;
 
     if (!file) {
       return res.status(400).json({ message: "Thiếu file profileImage" });
@@ -216,8 +216,7 @@ exports.uploadProfile = async(req, res) => {
 
     const result = await db.query(sql, [imageProfile, id]);
 
-    res.json({profileImage: result.rows[0].profileimage });
-
+    res.json({ profileImage: result.rows[0].profileimage });
   } catch (err) {
     console.error("Lỗi upload ảnh:", err);
     res.status(500).json({ message: "Lỗi server" });
@@ -257,5 +256,47 @@ exports.getUsers = async (req, res) => {
   } catch (err) {
     console.error("Lỗi lấy thông tin user:", err);
     res.status(500).json({ message: "Lỗi server" });
+  }
+};
+
+exports.updateUserProfile = async (req, res) => {
+  const currentUserId = req.user.id;
+  const { firstname, uid, bio, profileimage } = req.body;
+
+  try {
+    await db.query(
+      `UPDATE users
+      SET firstname = $1, 
+          uid = COALESCE($2, uid),
+          profileimage = $3,
+          createat = NOW()
+    WHERE id = $5`,
+      [firstname, uid, profileimage, currentUserId]
+    );
+    await db.query(
+      `INSERT INTO profile (user_id, bio, updated_at)
+        VALUES ($1, $2, NOW())
+        ON CONFLICT (user_id)
+        DO UPDATE SET bio = EXCLUDED.bio, uidated_at = NOW()`
+    );
+
+    const sql = `
+      SELECT 
+        u.id,
+        u.uid,
+        u.firstname,
+        u.email,
+        u.profileimage,
+        u.bio
+      FROM users u
+      LEFT JOIN profile p ON p.user_id = u.id
+      WHERE u.id = $1
+    `;
+    
+    const result = await db.query(sql, [currentUserId])
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.err("Loi cap nhat ho so")
+    res.status(500).json({message: "Loi server"})
   }
 };
