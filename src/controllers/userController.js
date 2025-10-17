@@ -200,7 +200,8 @@ exports.getUID = (req, res) => {
 //API profileImage
 exports.uploadProfile = async (req, res) => {
   try {
-    const { id, uid } = req.user;
+    const currentUserId = req.user.id;
+    const uid = req.user.uid;
     const file = req.file;
 
     if (!file) {
@@ -213,9 +214,14 @@ exports.uploadProfile = async (req, res) => {
     UPDATE users 
     SET profileimage = $1 
     WHERE id = $2
-    REUTURNING profileimage`;
+    RETURNING profileimage`;
 
-    const result = await db.query(sql, [imageProfile, id]);
+    const result = await db.query(sql, [imageProfile, currentUserId]);
+    
+    
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: "Không tìm thấy người dùng" });
+    }
 
     res.json({ profileImage: result.rows[0].profileimage });
   } catch (err) {
