@@ -42,6 +42,7 @@ exports.register = async (req, res) => {
 
 // API đăng nhập
 exports.login = async (req, res) => {
+  console.log("🧠 Body nhận được từ client:", req.body);
   const { email, password } = req.body;
 
   if (!email || !password) {
