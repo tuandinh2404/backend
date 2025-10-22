@@ -104,6 +104,10 @@ exports.getAllPosts = async (req, res) => {
   console.log('currentUserId (after parseInt):', currentUserId);
   console.log('Type:', typeof currentUserId);
   console.log('==========================================\n');
+
+  const page = parseInt(req.query.page) || 0;
+  const limit = parseInt(req.query.limit) || 20;
+  const offset = page * limit;
   
 
   try {
@@ -137,8 +141,9 @@ exports.getAllPosts = async (req, res) => {
                 JOIN users u ON p.user_id = u.id
                 LEFT JOIN post_media m ON p.id = m.post_id
                 GROUP BY p.id, u.id, u.uid, u.firstname
-                ORDER BY p.createat DESC`,
-                [ currentUserId ]
+                ORDER BY p.createat DESC
+                LIMIT $2 OFFSET $3`,
+                [ currentUserId, limit, offset ]
     );
     console.log('\n📊 QUERY RESULT:');
     console.log('Total posts:', result.rows.length);
