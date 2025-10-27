@@ -178,40 +178,7 @@ exports.getAllPosts = async (req, res) => {
   }
 };
 
-// exports.DeletePost = async (req, res) => {
-//   try {
-//     const userId = req.user.id;
-//     const postId = req.params.postId;
 
-//     const check = await db.query("SELECT * FROM posts WHERE id = $1", [postId]);
-//     if (check.rows.length === 0) {
-//       return res.status(404).json({ error: "Post No Exist" });
-//     }
-
-//     if (check.rows[0].user_id !== userId) {
-//       return res.status(403).json({ error: "Khong co quyen xoa bai viet nay" });
-//     }
-
-//     const mediaRes = await client.query("SELECT * FROM post_media WHERE post_id = $1", [postId]);
-
-//     await db.query("BEGIN");
-//     await db.query("DELETE FROM post_media WHERE post_id = $1", [postId]);
-//     await db.query("DELETE FROM post_like WHERE post_id = $1", [postId]);
-//     await db.query("DELETE FROM post_comments WHERE post_id = $1", [postId]);
-//     await db.query("DELETE FROM posts WHERE id = $1", [postId]);
-//     await db.query("COMMIT");
-
-//     for(let row of mediaRes.rows) {
-//       const key = row.url.split('/').pop();
-//       await s3.deleteObject
-//     }
-
-//     res.json({ success: true, message: "Da xoa bai viet" });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ error: "Loi server" })
-//   }
-// };
 exports.toggleLike = async (req, res) => {
   const postId = parseInt(req.params.postId)
   const userId = parseInt(req.user.id);
@@ -323,3 +290,39 @@ exports.getPostsUser = async (req, res) => {
     res.status(500).json({ error: "Loi server" });
   }
 };
+
+
+// exports.DeletePost = async (req, res) => {
+//   try {
+//     const userId = req.user.id;
+//     const postId = req.params.postId;
+
+//     const check = await db.query("SELECT * FROM posts WHERE id = $1", [postId]);
+//     if (check.rows.length === 0) {
+//       return res.status(404).json({ error: "Post No Exist" });
+//     }
+
+//     if (check.rows[0].user_id !== userId) {
+//       return res.status(403).json({ error: "Khong co quyen xoa bai viet nay" });
+//     }
+
+//     const mediaRes = await client.query("SELECT * FROM post_media WHERE post_id = $1", [postId]);
+
+//     await db.query("BEGIN");
+//     await db.query("DELETE FROM post_media WHERE post_id = $1", [postId]);
+//     await db.query("DELETE FROM post_like WHERE post_id = $1", [postId]);
+//     await db.query("DELETE FROM post_comments WHERE post_id = $1", [postId]);
+//     await db.query("DELETE FROM posts WHERE id = $1", [postId]);
+//     await db.query("COMMIT");
+
+//     for(let row of mediaRes.rows) {
+//       const key = row.url.split('/').pop();
+//       await s3.deleteObject
+//     }
+
+//     res.json({ success: true, message: "Da xoa bai viet" });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ error: "Loi server" })
+//   }
+// };
