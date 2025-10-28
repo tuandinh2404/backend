@@ -89,8 +89,9 @@ exports.login = async (req, res) => {
           id: user.id,
           email: user.email,
           firstName: user.firstname,
-          lastName: user.lastName,
+          lastName: user.lastname,
           uid: user.uid,
+          profileimage: user.profileimage,
         },
       });
     });
@@ -273,9 +274,9 @@ exports.updateUserProfile = async (req, res) => {
   try {
     await db.query(
       `UPDATE users
-      SET firstname = $1, 
+      SET firstname = COALESCE($1, firstname), 
           uid = COALESCE($2, uid),
-          profileimage = $3,
+          profileimage = COALESCE($3, profileimage),
           created_at = NOW()
     WHERE id = $4`,
       [firstname, uid, profileimage, currentUserId]
