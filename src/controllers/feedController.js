@@ -70,10 +70,10 @@ exports.getPosts = async (req, res) => {
                         ) FILTER (WHERE m.id IS NOT NULL),
                          '[]'
                     ) AS media,
-                    ( CASE WHEN EXISTS (
+                    EXISTS (
                       SELECT 1 FROM post_like
                       WHERE post_id = p.id AND user_id = $2
-                    )THEN true ELSE false END) AS is_liked
+                    ) AS is_liked
                 FROM posts p 
                 JOIN users u ON p.user_id = u.id
                 LEFT JOIN post_media m ON p.id = m.post_id
@@ -133,10 +133,10 @@ exports.getAllPosts = async (req, res) => {
                         ) FILTER (WHERE m.id IS NOT NULL),
                          '[]'
                     ) AS media,
-                    ( CASE WHEN EXISTS (
+                    EXISTS (
                       SELECT 1 FROM post_like
                       WHERE post_id = p.id AND user_id = $1
-                    ) THEN TRUE ELSE FALSE END) AS is_liked
+                    ) AS is_liked
                 FROM posts p 
                 JOIN users u ON p.user_id = u.id
                 LEFT JOIN post_media m ON p.id = m.post_id
@@ -269,10 +269,10 @@ exports.getPostsUser = async (req, res) => {
                         ) FILTER (WHERE m.id IS NOT NULL),
                          '[]'
                     ) AS media,
-                    ( CASE WHEN EXISTS (
+                    EXISTS (
                       SELECT 1 FROM post_like
                       WHERE post_id = p.id AND user_id = $2
-                    ) THEN true ELSE false END) AS is_liked
+                    ) AS is_liked
                 FROM posts p
                 JOIN users u ON p.user_id = u.id
                 LEFT JOIN post_media m ON p.id = m.post_id
