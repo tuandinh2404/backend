@@ -116,7 +116,7 @@ exports.updateUserProfile = async (req, res) => {
       SET firstname = COALESCE($1, firstname), 
           uid = COALESCE($2, uid),
           profileimage = COALESCE($3, profileimage),
-          created_at = NOW()
+          created_átaas = NOW()
     WHERE id = $4`,
       [firstname, uid, profileimage, currentUserId]
     );
@@ -140,7 +140,6 @@ exports.updateUserProfile = async (req, res) => {
       LEFT JOIN profile p ON p.user_id = u.id
       WHERE u.id = $1
     `;
-    
     const result = await db.query(sql, [currentUserId])
     res.json(result.rows[0]);
   } catch (err) {
