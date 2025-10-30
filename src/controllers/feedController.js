@@ -92,19 +92,7 @@ exports.getPosts = async (req, res) => {
 };
 
 exports.getAllPosts = async (req, res) => {
-  console.log('\n==========================================');
-  console.log('📝 GET ALL POSTS REQUEST');
-  console.log('==========================================');
-  console.log('req.user (raw):', JSON.stringify(req.user, null, 2));
-  console.log('req.user.id:', req.user.id);
-  console.log('Type of req.user.id:', typeof req.user.id);
-  
   const currentUserId = parseInt(req.user.id);
-
-  console.log('currentUserId (after parseInt):', currentUserId);
-  console.log('Type:', typeof currentUserId);
-  console.log('==========================================\n');
-
   const page = parseInt(req.query.page) || 0;
   const limit = parseInt(req.query.limit) || 20;
   const offset = page * limit;
@@ -145,15 +133,10 @@ exports.getAllPosts = async (req, res) => {
                 LIMIT $2 OFFSET $3`,
                 [ currentUserId, limit, offset ]
     );
-    console.log('\n📊 QUERY RESULT:');
-    console.log('Total posts:', result.rows.length);
 
      if (result.rows.length > 0) {
-      console.log('\nFirst 3 posts:');
       result.rows.slice(0, 3).forEach((post, i) => {
-        console.log(`  [${i}] Post ${post.post_id}:`);
-        console.log(`      - is_liked: ${post.is_liked}`);
-        console.log(`      - like_count: ${post.like_count}`);
+      
       });
     }
 
@@ -162,15 +145,13 @@ exports.getAllPosts = async (req, res) => {
       [currentUserId]
     );
     
-    console.log('\n💖 USER LIKES IN DB:');
-    console.log('Total likes by user:', likesCheck.rows.length);
+  
     if (likesCheck.rows.length > 0) {
       console.log('Liked post IDs:', likesCheck.rows.map(r => r.post_id).join(', '));
     } else {
       console.log('⚠️ NO LIKES FOUND!');
     }
 
-    console.log('==========================================\n');
     res.json(result.rows);
   } catch (err) {
     console.error(err);
@@ -182,13 +163,6 @@ exports.getAllPosts = async (req, res) => {
 exports.toggleLike = async (req, res) => {
   const postId = parseInt(req.params.postId)
   const userId = parseInt(req.user.id);
-
-  console.log('\n💖 ==========================================');
-  console.log('TOGGLE LIKE REQUEST');
-  console.log('==========================================');
-  console.log('Post ID:', postId, typeof postId);
-  console.log('User ID:', userId, typeof userId);
-  console.log('==========================================\n');
 
   try {
     await db.query("BEGIN");
@@ -241,7 +215,6 @@ exports.toggleLike = async (req, res) => {
 
 exports.getPostsUser = async (req, res) => {
   const currentUserId = req.user.id;
-  console.log("Current User ID:", currentUserId);
   const userId = parseInt(req.params.userId);
   const page = parseInt(req.query.page) || 0;
   const limit = parseInt(req.query.limit) || 20;
