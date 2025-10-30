@@ -7,34 +7,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 const jwtSecret = process.env.JWT_SECRET;
 
-// API đăng ký
 
-
-//Lấy uid
-exports.getUID = (req, res) => {
-  const authHeader = req.headers["authorization"];
-  if (!authHeader) {
-    return res.status(401).json({ message: "Chưa có token" });
-  }
-
-  const token = authHeader.split(" ")[1];
-  jwt.verify(token, jwtSecret, (err, decoded) => {
-    if (err) {
-      return res.status(403).json({ message: "Token không hợp lệ" });
-    }
-    const userId = decoded.userId; // lấy userId từ token đã giải mã
-
-    // Truy vấn database để lấy uid dựa trên userId
-    const sql = "SELECT uid FROM users WHERE id = $1";
-    db.query(sql, [userId], (err, results) => {
-      if (err) return res.status(500).json({ message: "Lỗi server" });
-      if (results.rows.length === 0) {
-        return res.status(404).json({ message: "Không tìm thấy uid" });
-      }
-      res.json({ uid: results.rows[0].uid });
-    });
-  });
-};
 
 //API profileImage
 exports.uploadProfile = async (req, res) => {
@@ -93,6 +66,7 @@ exports.getUsers = async (req, res) => {
       FROM users u 
       LEFT JOIN profile p ON p.user_id = u.id
       WHERE u.uid = $1`;
+
   try {
     const result = await db.query(sql, [uid, currentUserId]);
 
