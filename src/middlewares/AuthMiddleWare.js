@@ -6,11 +6,11 @@ const AuthMiddleWare = async (req, res, next) => {
   try {
     const authHeader = req.headers["authorization"];
     if (!authHeader) {
-      return res.status(401).json({ message: "Thieu Token" });
+      return res.status(401).json({ message: "Thiếu Token" });
     }
     const token = authHeader.split(" ")[1];
     if (!token) {
-      return res.status(401).json({ message: "Token khong hop le" });
+      return res.status(401).json({ message: "Token không hợp lệ" });
     }
 
     const decoded = jwt.verify(token, JWT_SECRET);
@@ -20,13 +20,14 @@ const AuthMiddleWare = async (req, res, next) => {
       [decoded.id]
     );
     if (result.rows.length === 0) {
-      return res.status(401).json({ message: "User No Exist" });
+      return res.status(401).json({ message: "Người dùng Không Tồn Tại" });
     }
 
     req.user = result.rows[0];
     next();
   } catch (err) {
-    console.error("Loi xac thuc Token:", err);
+    console.error("Lỗi xác thực Token:", err.message);
+    console.log("Header nhận được", authHeader);
     res.status(403).json({ message: "Token không hợp lệ hoặc đã hết hạn" });
   }
 };
