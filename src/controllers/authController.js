@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const db = require("../config/db");
+const bcrypt = require("bcrypt");
 const jwtSecret = process.env.JWT_SECRET;
 
 exports.refreshToken = (req, res) => {
