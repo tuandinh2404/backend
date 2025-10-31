@@ -3,8 +3,8 @@ const jwt = require("jsonwebtoken");
 const JWT_SECRET = process.env.JWT_SECRET;
 
 const AuthMiddleWare = async (req, res, next) => {
+  const authHeader = req.headers["authorization"];
   try {
-    const authHeader = req.headers["authorization"];
     if (!authHeader) {
       return res.status(401).json({ message: "Thiếu Token" });
     }
