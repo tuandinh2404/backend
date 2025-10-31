@@ -17,10 +17,13 @@ const AuthMiddleWare = async (req, res, next) => {
 
     const decoded = jwt.verify(token, JWT_SECRET);
     console.log("Decoded Token:", decoded);
-    
+
+    const userId = parseInt(decoded.userId, 10);
+
+
     const result = await db.query(
       `SELECT id, uid, firstname, lastname, email FROM users WHERE id = $1`,
-      [decoded.userId]
+      [userId]
     );
     if (result.rows.length === 0) {
       return res.status(401).json({ message: "Người dùng Không Tồn Tại" });
