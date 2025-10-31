@@ -18,7 +18,7 @@ const AuthMiddleWare = async (req, res, next) => {
     const decoded = jwt.verify(token, JWT_SECRET);
     console.log("Decoded Token:", decoded);
 
-    const userId = parseInt(decoded.id, 10);
+    const userId = parseInt(decoded.userId, 10);
 
 
     const result = await db.query(
