@@ -1,11 +1,7 @@
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
 const db = require("../config/db");
 const multer = require("multer");
 const uploadToS3 = require("../util/UploadToS3");
 const upload = multer({ storage: multer.memoryStorage() });
-
-const jwtSecret = process.env.JWT_SECRET;
 
 
 
