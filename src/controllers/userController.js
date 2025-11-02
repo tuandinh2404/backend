@@ -2,6 +2,7 @@ const db = require("../config/db");
 const multer = require("multer");
 const uploadToS3 = require("../util/UploadToS3");
 const upload = multer({ storage: multer.memoryStorage() });
+const userModels = require("../models/userModels");
 
 
 
@@ -18,13 +19,7 @@ exports.uploadProfile = async (req, res) => {
 
     const imageProfile = await uploadToS3(file.buffer, file.originalname, uid);
 
-    const sql = `
-    UPDATE users 
-    SET profileimage = $1 
-    WHERE id = $2
-    RETURNING profileimage`;
-
-    const result = await db.query(sql, [imageProfile, currentUserId]);
+    const result = await userModels.updateProfileQuery(imageProfile, currentUserId);
     
     
     if (result.rowCount === 0) {
@@ -42,29 +37,10 @@ exports.getUsers = async (req, res) => {
   const uid = req.params.uid;
   const currentUserId = req.user.id;
   console.log("📥 Vào getUsers với uid:", req.params.uid, "| currentUserId:", req.user.id);
-  const sql = `SELECT 
-      u.id, 
-      u.email, 
-      u.firstname, 
-      u.lastname, 
-      u.uid,  
-      u.profileimage,
-      p.bio,
-      (SELECT COUNT(*) FROM follows f1 WHERE f1.following_id = u.id) AS followers_count,
-      (SELECT COUNT(*) FROM follows f2 WHERE f2.follower_id = u.id) AS following_count,
-      CASE
-        WHEN u.id = $2 THEN NULL
-        ELSE EXISTS (
-          SELECT 1 FROM follows
-          WHERE follower_id = $2 AND following_id = u.id
-          )
-      END AS is_following
-      FROM users u 
-      LEFT JOIN profile p ON p.user_id = u.id
-      WHERE u.uid = $1`;
+  
 
   try {
-    const result = await db.query(sql, [uid, currentUserId]);
+    const result = await userModels.getUserById(uid, currentUserId);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ message: "user không tồn tại" });
