@@ -73,7 +73,30 @@ const queryGetAllPosts = async(currentUserId, limit, offset) => {
     )
 }
 
+const queryTongleLikePost = async(postId, userId) => {
+    return await db.query(`
+        WITH like_action AS (
+        INSERT INTO post_like (post_id, user_id)
+        VALUES ($1, $2)
+        ON CONFLICT (post_id, user_id) DO NOTHING
+        RETURNING 1
+      ),
+      unlike_action AS (
+        DELETE FROM post_like
+        WHERE post_id = $1 AND user_id = $2
+        AND NOT EXISTS (SELECT 1 FROM like_action)
+        RETURNING -1
+      )
+      SELECT COALESCE(
+        (SELECT 1 FROM like_action),
+        (SELECT -1 FROM unlike_action)
+      ) as action`, 
+    [postId, userId]
+    )
+}
+
 module.exports = {
   queryGetPostById,
-  queryGetAllPosts
+  queryGetAllPosts,
+  queryTongleLikePost
 };
