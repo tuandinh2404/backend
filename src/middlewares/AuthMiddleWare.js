@@ -10,14 +10,12 @@ const AuthMiddleWare = async (req, res, next) => {
       return res.status(401).json({ message: "Thiếu Token" });
     }
     const token = authHeader.split(" ")[1];
-    console.log("Received Token:", token);
     if (!token) {
       console.log("Token không được cung cấp trong header");
       return res.status(401).json({ message: "Token không hợp lệ" });
     }
 
     const decoded = jwt.verify(token, JWT_SECRET);
-    console.log("Decoded Token:", decoded);
     const userId = parseInt(decoded.userId, 10);
 
 
