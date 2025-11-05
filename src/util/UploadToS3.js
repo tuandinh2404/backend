@@ -9,7 +9,7 @@ require("dotenv").config();
 
 const CLOUDFRONT_DOMAIN = process.env.CLOUDFRONT_DOMAIN ||`https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com`;
 
-  console.log("🌍 CLOUDFRONT_DOMAIN =", CLOUDFRONT_DOMAIN);
+  console.log("🌍 MIỀN_CLOUDFRONT =", CLOUDFRONT_DOMAIN);
 
 
 const uploadToS3 = async (buffer, originalFilename, uid) => {
@@ -19,7 +19,7 @@ const uploadToS3 = async (buffer, originalFilename, uid) => {
   
   let ContentType = mine.lookup(ext) || "application/octet-stream";
 
-    if (ext === ".mp4") {
+  if (ext === ".mp4") {
     ContentType = "video/mp4";
   } else if (ext === ".jpg" || ext === ".jpeg") {
     ContentType = "image/jpeg";
@@ -37,7 +37,7 @@ const uploadToS3 = async (buffer, originalFilename, uid) => {
   const result = await s3.send(new PutObjectCommand(params));
   const Location = `${CLOUDFRONT_DOMAIN}/${key}`;
 
-  console.log("✅ Upload lên S3 cloudfront:", Location);
+  console.log("✅ Đã tải lên S3 cloudfront:", Location);
   return Location;
 };
 

@@ -1,8 +1,17 @@
 const db = require("../config/db");
 
+const queryInsertPostId = async (userId, context) => {
+  return await db.query(
+    `
+        INSERT INTO posts (user_id, context)
+        VALUES ($1, $2) RETURNING id`,
+    [userId, context]
+  );
+};
+
 const queryGetPostById = async (postId, currentUserId) => {
-    return await db.query(
-        `SELECT 
+  return await db.query(
+    `SELECT 
             p.id AS post_id,
             p.context,
             p.like_count,
@@ -32,13 +41,13 @@ const queryGetPostById = async (postId, currentUserId) => {
         LEFT JOIN post_media m ON p.id = m.post_id
         WHERE p.id = $1
         GROUP BY p.id, u.id, u.uid, u.firstname`,
-        [postId, currentUserId]
+    [postId, currentUserId]
   );
 };
 
-const queryGetAllPosts = async(currentUserId, limit, offset) => {
-    return await db.query(
-        `SELECT 
+const queryGetAllPosts = async (currentUserId, limit, offset) => {
+  return await db.query(
+    `SELECT 
             p.id AS post_id,
             p.context,
             p.like_count,
@@ -69,12 +78,13 @@ const queryGetAllPosts = async(currentUserId, limit, offset) => {
         GROUP BY p.id, u.id, u.uid, u.firstname
         ORDER BY p.createat DESC
         LIMIT $2 OFFSET $3`,
-        [ currentUserId, limit, offset ]
-    )
-}
+    [currentUserId, limit, offset]
+  );
+};
 
-const queryTongleLikePost = async(postId, userId) => {
-    return await db.query(`
+const queryTongleLikePost = async (postId, userId) => {
+  return await db.query(
+    `
         WITH like_action AS (
         INSERT INTO post_like (post_id, user_id)
         VALUES ($1, $2)
@@ -90,13 +100,14 @@ const queryTongleLikePost = async(postId, userId) => {
       SELECT COALESCE(
         (SELECT 1 FROM like_action),
         (SELECT -1 FROM unlike_action)
-      ) as action`, 
+      ) as action`,
     [postId, userId]
-    )
-}
+  );
+};
 
 module.exports = {
+  queryInsertPostId,
   queryGetPostById,
   queryGetAllPosts,
-  queryTongleLikePost
+  queryTongleLikePost,
 };

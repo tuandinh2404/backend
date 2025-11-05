@@ -13,11 +13,7 @@ exports.Posts = async (req, res) => {
   const userId = req.user.id;
   const { context } = req.body;
   try {
-    const postResult = await db.query(
-      `INSERT INTO posts (user_id, context)
-            VALUES ($1, $2) RETURNING id`,
-      [userId, context]
-    );
+    const postResult = await feedModels.queryInsertPostId(userId, context);
     const postId = postResult.rows[0].id;
     if (req.files && req.files.length > 0) {
       const valuesArray = await Promise.all(
@@ -34,29 +30,29 @@ exports.Posts = async (req, res) => {
       const values = valuesArray.join(", ");
       await db.query(
         `INSERT INTO post_media (post_id, media_url, media_type, position)
-                VALUES ${values}`
+        VALUES ${values}`
       );
     }
     res.json({ success: true, postId });
   } catch (err) {
     console.error("Lỗi bài viết", err);
-    res.status(500).json({ error: "serrver error post" });
+    res.status(500).json({ error: "Bài đăng lỗi Server" });
   }
 };
 
 exports.getPosts = async (req, res) => {
   const currentUserId = req.user.id;
-  console.log("Current User ID:", currentUserId);
+  console.log("Người dùng chính ID là:", currentUserId);
   const postId = req.params.postId;
   try {
     const result = await feedModels.queryGetPostById(postId, currentUserId);
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Post Not Fount" });
+      return res.status(404).json({ error: "Bài đăng không tồn tại" });
     }
     res.json(result.rows[0]);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Loi server" });
+    res.status(500).json({ error: "Lỗi server" });
   }
 };
 
@@ -83,15 +79,15 @@ exports.getAllPosts = async (req, res) => {
     
   
     if (likesCheck.rows.length > 0) {
-      console.log('Liked post IDs:', likesCheck.rows.map(r => r.post_id).join(', '));
+      console.log('ID bài viết đã thích:', likesCheck.rows.map(r => r.post_id).join(', '));
     } else {
-      console.log('⚠️ NO LIKES FOUND!');
+      console.log('⚠️ Lượt thích không có!');
     }
 
     res.json(result.rows);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Loi server" });
+    res.status(500).json({ error: "Lỗi server" });
   }
 };
 
@@ -123,12 +119,12 @@ exports.toggleLike = async (req, res) => {
           likeCount: likeCount,
           userId: userId.toString(),
           isLiked,
-        }, userId.toString()); // Gửi thông báo đến tất cả trừ người thực hiện hành động
+        }, userId.toString());
         res.json({ success: true, likeCount, isLiked });
   } catch( err) {
     await db.query("ROLLBACK");
     console.error(err);
-    res.status(500).json({ error: "Loi server" });
+    res.status(500).json({ error: "Lỗi server" });
   }
 };
 
@@ -141,17 +137,17 @@ exports.getPostsUser = async (req, res) => {
   try {
     const result = await db.query(
       `SELECT 
-                p.id AS post_id,
-                p.context,
-                p.like_count,
-                p.comment_count,
-                p.createat,
-                u.id AS user_id,
-                u.uid,
-                u.profileimage,
-                u.firstname,
-                    COALESCE(
-                        json_agg(
+            p.id AS post_id,
+            p.context,
+            p.like_count,
+            p.comment_count,
+            p.createat,
+            u.id AS user_id,
+            u.uid,
+            u.profileimage,
+            u.firstname,
+                COALESCE(
+                    json_agg(
                             json_build_object(
                                 'id', m.id,
                                 'url', m.media_url,
@@ -179,7 +175,7 @@ exports.getPostsUser = async (req, res) => {
     res.json(result.rows);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Loi server" });
+    res.status(500).json({ error: "Lỗi server" });
   }
 };
 
