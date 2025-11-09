@@ -79,7 +79,7 @@ exports.getAllPosts = async (req, res) => {
     
   
     if (likesCheck.rows.length > 0) {
-      console.log('ID bài viết đã thích:', likesCheck.rows.map(r => r.post_id).join(', '));
+      console.log('\nID bài viết đã thích:', likesCheck.rows.map(r => r.post_id).join(', '));
     } else {
       console.log('⚠️ Lượt thích không có!');
     }

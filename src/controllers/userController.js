@@ -36,7 +36,6 @@ exports.uploadProfile = async (req, res) => {
 exports.getUsers = async (req, res) => {
   const uid = req.params.uid;
   const currentUserId = req.user.id;
-  console.log("📥 Vào getUsers với uid:", req.params.uid, "| currentUserId:", req.user.id);
   
 
   try {
