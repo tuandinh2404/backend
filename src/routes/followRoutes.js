@@ -1,8 +1,8 @@
-const followController = require('../controllers/followController');
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const authController = require("../controllers/authController")
+const followController = require('../controllers/followController');
+const AuthMiddleWare = require("../middlewares/AuthMiddleWare");
 
-router.post('/follow/:userId', authController, followController.followUser);
+router.post('/follow/:userId', AuthMiddleWare, followController.followUser);
 
 module.exports = router;
