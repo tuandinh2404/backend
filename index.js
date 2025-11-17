@@ -8,6 +8,7 @@ require("./ws-server")
 const authRouter = require("./src/routes/authRoutes")
 const userRouter = require("./src/routes/userRoutes")
 const feedRouter = require("./src/routes/feedRoutes")
+const followRouter = require("./src/routes/followRoutes")
 
 dotenv.config();
 const app = express();
@@ -23,6 +24,9 @@ app.use("/api-auth", authRouter )
 
 //Lấy post
 app.use("/api-feed", feedRouter)
+
+//DANH SÁCH THEO DÕI, BẠN BÈ
+app.use("/api-follow", followRouter)
 
 
 
