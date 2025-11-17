@@ -18,20 +18,29 @@ exports.followUser = async (req, res) => {
         )
 
         if(result.rowCount === 0) {
-            return res.status(200).json({ message: "Đã theo dõi người này."});
+            return res.status(200).json({ 
+                message: "Đã theo dõi người này.",
+                status: "already_following"
+            });
         };
 
         const mutual = await db.query(
             `SELECT 1 FROM follows
-            WHERE followr_id = $1 AND following_id = $2`,
+            WHERE follower_id = $1 AND following_id = $2`,
             [followingId, currentFollowedId]
         );
 
         if(mutual.rowCount > 0) {
-            return res.status(201).json({ message: "Đã trở thành bạn bè "})
+            return res.status(201).json({ 
+                message: "Đã trở thành bạn bè ",
+                status: "mutual"
+            });
         }
 
-        return res.status(201).json({ message: "Theo dõi thành công."});
+        return res.status(201).json({ 
+            message: "Theo dõi thành công.",
+            status: "followed"
+        });
     } catch (error) {
         console.error("Error following user:", error);
         return res.status(500).json({ message: "Lỗi Server"});
