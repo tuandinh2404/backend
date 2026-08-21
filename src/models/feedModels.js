@@ -45,7 +45,7 @@ const queryGetPostById = async (postId, currentUserId) => {
   );
 };
 
-const queryGetAllPosts = async (currentUserId, limit, offset) => {
+const queryGetAllPosts = async (currentUserId, limit, cursor) => {
   return await db.query(
     `SELECT 
             p.id AS post_id,
@@ -75,10 +75,11 @@ const queryGetAllPosts = async (currentUserId, limit, offset) => {
         FROM posts p 
         JOIN users u ON p.user_id = u.id
         LEFT JOIN post_media m ON p.id = m.post_id
+        WHERE($3::timestamp IS NULL OR p.createat < $3)
         GROUP BY p.id, u.id, u.uid, u.firstname
         ORDER BY p.createat DESC
-        LIMIT $2 OFFSET $3`,
-    [currentUserId, limit, offset]
+        LIMIT $2`,
+    [currentUserId, limit + 1, cursor]
   );
 };
 

@@ -58,33 +58,26 @@ exports.getPosts = async (req, res) => {
 
 exports.getAllPosts = async (req, res) => {
   const currentUserId = parseInt(req.user.id);
-  const page = parseInt(req.query.page) || 0;
   const limit = parseInt(req.query.limit) || 20;
-  const offset = page * limit;
+  const cursor = req.query.cursor || null;
   
 
   try {
-    const result = await feedModels.queryGetAllPosts(currentUserId, limit, offset);
+    const result = await feedModels.queryGetAllPosts(currentUserId, limit, cursor);
 
-     if (result.rows.length > 0) {
-      result.rows.slice(0, 3).forEach((post, i) => {
-      
-      });
-    }
-
-    const likesCheck = await db.query(
-      `SELECT post_id FROM post_like WHERE user_id = $1 ORDER BY post_id`,
-      [currentUserId]
-    );
+    const hasMore = result.rows.length > limit;
+    const posts = hasMore ? result.rows.slice(0, limit) : result.rows;
+    const nextCursor = hasMore ? posts[posts.length - 1].createat : null;
     
-  
-    if (likesCheck.rows.length > 0) {
-      console.log('\nID bài viết đã thích:', likesCheck.rows.map(r => r.post_id).join(', '));
-    } else {
-      console.log('⚠️ Lượt thích không có!');
-    }
 
-    res.json(result.rows);
+
+    res.json({
+      data: posts,
+      pagination: {
+        nextCursor,
+        hasMore
+      }
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Lỗi server" });
